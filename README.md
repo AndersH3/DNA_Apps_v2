@@ -11,13 +11,5 @@ Usage ``` python3.7 merge_ydata.py file1.txt file2.txt ... extra.txt ```
 - Autosomal DNA Converter available at [http://www.y-str.org/2014/09/autosomal-dna-converter-nix.html](http://www.y-str.org/2014/09/autosomal-dna-converter-nix.html). Not mine.
 <hr>
 
-  <br />
-  To the extent possible under law,
-  <a rel="dct:publisher"
-     href="https://github.com/AndersH3">
-    <span property="dct:title">Anders Hellström</span></a>
-  has waived all copyright and related or neighboring rights to
-  <span property="dct:title">DNA Apps</span>.
-</p>
-<hr>
+  
 
