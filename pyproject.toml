@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "dna-apps-v2"
+version = "0.2.0"
+description = "Small, contract-annotated tools for merging genotype and Y-marker files"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = ["deal>=4.24,<5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "hypothesis>=6", "ruff>=0.9", "deal[all]>=4.24,<5"]
+
+[project.scripts]
+dna-merge = "merge:main"
+dna-merge-ydata = "merge_ydata:main"
+dna-extract = "extract:main"
+
+[tool.setuptools]
+py-modules = ["merge", "merge_ydata", "extract", "dna_io"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]

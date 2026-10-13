@@ -1,68 +1,87 @@
-#!/usr/bin/python3.7
-# -*- coding: utf-8 -*-
-# Use only with files in ftdna format
-# you can reformat your data with [https://ytree.morleydna.com/extractFromAutosomal]
-# just copy and paste the data from the last step into a file.
-# But do not hand edit the data.
-# If you want to manually add some snps add them into a separate file eg extra.txt.
-# Usage python3.7 merge_ydata.py file1.txt file2.txt ... extra.txt
+#!/usr/bin/env python3
+"""Merge comma-separated Y-marker calls into unique, sorted output files."""
+
+from __future__ import annotations
+
+import argparse
+from collections.abc import Iterable, Sequence
+from pathlib import Path
+from uuid import uuid4
+
+import deal
+
+from dna_io import read_lines, write_outputs
 
 
+@deal.has("read")
+@deal.post(lambda result: len(result) == 3 and all(items == sorted(set(items)) for items in result))
+@deal.post(lambda result: result[1] == [item for item in result[0] if item.endswith("+")])
+@deal.post(lambda result: result[2] == [item for item in result[0] if item.endswith("-")])
+def process(input_data: Iterable[str]) -> list[list[str]]:
+    """Return [all, positive, negative] marker lists without printing or mutation.
 
-import sys
-from random import *
-from re import *
-
-
-def process(input_data):
-    results = set([])
-    positive = set([])
-    negative = set([])
-    white_space = compile(r"\s")
-    for inp in input_data:
-        inp = white_space.sub("", inp)
-        if inp != '':
-            results.add(inp)
-            if inp.endswith('+'):
-                positive.add(inp)
-            elif inp.endswith('-'):
-                negative.add(inp)
-            else:
-                print(inp)
-    return [sorted(results), sorted(positive), sorted(negative)]
+    Whitespace anywhere in an entry is removed for compatibility with the old
+    script. Empty entries are discarded. Unsigned entries are retained in the
+    combined list and counted as unclassified in the CLI report. Opposite calls
+    (M1+ and M1-) are both retained; this tool does not resolve their conflict.
+    """
+    # Deduplicate once across all files, so every output and report uses the same
+    # definition of a count: unique normalized marker-call strings.
+    markers = sorted({normalized for item in input_data if (normalized := "".join(item.split()))})
+    return [
+        markers,
+        [m for m in markers if m.endswith("+")],
+        [m for m in markers if m.endswith("-")],
+    ]
 
 
-if __name__ == '__main__':
-    if len(sys.argv) > 1:
-        data = []
-        data_positive = []
-        data_negative = []
-        first = 0
-        pattern = compile(r"merge_ydata")
-        for file_location in sys.argv:
-            file_location = file_location.strip()
-            if pattern.match(file_location):
-                first += 1
-            elif first > 0:
-                with open(file_location, 'r') as input_data_file:
-                    the_input_data = input_data_file.read()
-                    res = process(the_input_data.split(","))
-                    data.extend(res[0])
-                    data_positive.extend(res[1])
-                    data_negative.extend(res[2])
-        nr = round(random() * 10000)
-        f = open(str(nr) + ".out.txt", "w")
-        f.write(",".join(sorted(set(data))))
-        f = open(str(nr) + ".positive.out.txt", "w")
-        f.write(",".join(data_positive))
-        f = open(str(nr) + ".negative.out.txt", "w")
-        f.write(",".join(data_negative))
-        report = "snps: " + str(len(data)) + "   " \
-                 + "snps(positive): " + str(len(data_positive)) + "   " \
-                 + "snps(negative): " + str(len(data_negative)) + "   "
-        f = open(str(nr) + ".report.out.txt", "w")
-        f.write(report)
-        exit(0)
-    else:
-        print('This requires some input files.')
-        exit(1)
+@deal.pure
+@deal.post(lambda result: result == sorted(set(result)))
+def conflicting_markers(positive: Sequence[str], negative: Sequence[str]) -> list[str]:
+    """List marker names present with both signs, without discarding either call."""
+    return sorted({item[:-1] for item in positive} & {item[:-1] for item in negative})
+
+
+def main(argv: Sequence[str] | None = None) -> int:
+    """Write all, positive, negative, and report files under a shared prefix."""
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("files", nargs="+", type=Path, help="comma-separated marker-call files")
+    parser.add_argument(
+        "--output-prefix",
+        type=Path,
+        help="output path prefix (default: unique ID in current directory)",
+    )
+    args = parser.parse_args(argv)
+    prefix = args.output_prefix if args.output_prefix is not None else Path(uuid4().hex)
+    try:
+        # Read each file as a complete comma-separated list. Newlines are
+        # whitespace, not extra delimiters, matching the historical format.
+        entries = (
+            entry
+            for path in args.files
+            for entry in "".join(line for _, line in read_lines(path)).split(",")
+        )
+        all_markers, positive, negative = process(entries)
+        conflicts = conflicting_markers(positive, negative)
+        report = (
+            f"snps: {len(all_markers)}   snps(positive): {len(positive)}   snps(negative): {len(negative)}\n"
+            f"unclassified: {len(all_markers) - len(positive) - len(negative)}\n"
+            f"conflicting markers: {len(conflicts)}\n"
+            f"conflicts: {','.join(conflicts)}\n"
+        )
+        write_outputs(
+            {
+                Path(f"{prefix}.out.txt"): ",".join(all_markers),
+                Path(f"{prefix}.positive.out.txt"): ",".join(positive),
+                Path(f"{prefix}.negative.out.txt"): ",".join(negative),
+                Path(f"{prefix}.report.out.txt"): report,
+            }
+        )
+    except (OSError, UnicodeError, ValueError) as error:
+        parser.exit(1, f"{parser.prog}: {error}\n")
+    print(f"Wrote {prefix}.out.txt and positive, negative, and report files.")
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
