@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# AI disclosure: substantially generated or refactored with OpenAI Codex, 2026-10-13.
+# See the repository-root AI_DISCLOSURE.md for provenance, scope, and review limits.
 """Extract signed marker calls from seven-column, tab-separated YSEQ records."""
 
 from __future__ import annotations

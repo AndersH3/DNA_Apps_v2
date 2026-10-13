@@ -13,6 +13,23 @@ The code includes type hints, detailed docstrings and algorithm comments, and
 [design and contracts](docs/design.md) for function boundaries, assumptions,
 compatibility changes, and verification limits.
 
+## AI disclosure
+
+**This version contains substantial AI-generated and AI-refactored code, tests,
+comments, documentation, and configuration produced with OpenAI Codex on
+13 October 2026.** The AI contribution went beyond proofreading or completion
+suggestions: Codex implemented the refactoring, selected implementation details,
+wrote the tests and Deal contracts, ran checks, and committed and pushed the
+changes at the repository owner's request.
+
+The tests were also AI-authored. Passing them does not constitute independent
+human review, formal verification, or biological validation. No independent
+human code audit is documented for this refactoring.
+
+See the **[full AI disclosure](AI_DISCLOSURE.md)** for the exact contribution
+scope, development process, data used, verification evidence, limitations, and
+human/AI responsibilities. The programs themselves do not call an AI service.
+
 ## Install
 
 Python **3.10 or newer** is required. From the repository directory:

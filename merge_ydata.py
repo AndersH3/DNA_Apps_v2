@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# AI disclosure: substantially generated or refactored with OpenAI Codex, 2026-10-13.
+# See the repository-root AI_DISCLOSURE.md for provenance, scope, and review limits.
 """Merge comma-separated Y-marker calls into unique, sorted output files."""
 
 from __future__ import annotations

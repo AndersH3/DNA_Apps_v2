@@ -1,3 +1,5 @@
+# AI disclosure: substantially generated or refactored with OpenAI Codex, 2026-10-13.
+# See the repository-root AI_DISCLOSURE.md for provenance, scope, and review limits.
 """Shared UTF-8 input and non-overwriting output for the command-line tools."""
 
 from collections.abc import Iterator, Mapping

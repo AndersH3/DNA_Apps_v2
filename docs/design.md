@@ -1,5 +1,8 @@
 # Design, contracts, and compatibility
 
+This document was generated with OpenAI Codex. See the
+[full AI disclosure](../AI_DISCLOSURE.md) for scope and review limitations.
+
 ## Module boundaries
 
 | Module | Responsibility | Main reusable functions |

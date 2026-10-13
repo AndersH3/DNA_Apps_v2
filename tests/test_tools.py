@@ -1,3 +1,5 @@
+# AI disclosure: substantially generated or refactored with OpenAI Codex, 2026-10-13.
+# See the repository-root AI_DISCLOSURE.md for provenance, scope, and review limits.
 """Synthetic regression, property, contract, and CLI tests; no personal DNA data."""
 
 import itertools
